@@ -11,7 +11,7 @@ import Profile from './Profile';
 import CreatePost from './CreatePost';
 
 const Navbar = () => {
-    const {isLoggedIn ,setIsLoggedIn, setUsername, setLikedPosts} = useContext(AuthContext);
+    const {isLoggedIn ,setIsLoggedIn, setUsername, setLikedPosts, username} = useContext(AuthContext);
     const changeWidth = 814;
 
     const getUser = () => {
@@ -24,7 +24,8 @@ const Navbar = () => {
             setIsLoggedIn(true);
             setUsername(res.data.username);
             setLikedPosts(res.data.likedPosts);
-        });
+        })
+        .catch(err => console.log(err));
     }
 
     const logOut = () => {
@@ -44,7 +45,7 @@ const Navbar = () => {
             <div className = 'Navbar'>
                 <Link to = "/" className = "nav-logo">Smedia</Link>
                 {isLoggedIn ? 
-                <Link to = '/profile' className = "nav-button-text">
+                <Link to = {`/profile/${username}`} className = "nav-button-text">
                     {window.innerWidth > changeWidth ? "Profile" : <i className="fas fa-user"></i>}
                 </Link> : ""}
                 {isLoggedIn ? 
@@ -76,11 +77,10 @@ const Navbar = () => {
                 <PrivateRoute path = '/login' loginCondition = 'loggedOut'>
                     <Login updateStateFunc = {getUser}/>
                 </PrivateRoute>
-                <PrivateRoute path = '/profile' loginCondition = 'loggedIn'>
-                    <Profile getUser = {getUser}/>
-                </PrivateRoute>
                 <PrivateRoute path = '/createPost' loginCondition = "loggedIn">
                     <CreatePost/>
+                </PrivateRoute>
+                <PrivateRoute path = "/profile/:username" loginCondition = "loggedIn" children = {<Profile getUser = {getUser}/>}>
                 </PrivateRoute>
             </Switch>
         </Router>       

@@ -1,14 +1,15 @@
 import '../Styles/Profile.css';
 import axios from 'axios';
-import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../authContext';
+import { useEffect, useState } from 'react';
 import PostList from './PostList';
+import { useParams } from 'react-router';
 
 const Profile = ({getUser}) => {
 
-    const {username} = useContext(AuthContext);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    let {username} = useParams();
 
     const getProfilePosts = () => {
         axios({

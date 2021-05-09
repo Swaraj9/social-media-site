@@ -7,15 +7,13 @@ const Home = ({getUser}) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const getPosts = () => {
-        axios({
+    const getPosts = async () => {
+        const res = await axios({
             method: "get",
             url: "http://localhost:5000/api/posts"
         })
-        .then(res => {
-            setPosts(res.data);
-            setLoading(false);
-        })
+        setPosts(res.data);
+        setLoading(false);
     }
 
     useEffect(() => {

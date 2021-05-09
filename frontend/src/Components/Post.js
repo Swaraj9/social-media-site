@@ -1,11 +1,12 @@
 import '../Styles/Post.css';
 import axios from 'axios';
-import {useContext, useEffect, useState} from 'react';
+import {useContext, useState, useEffect} from 'react';
 import { AuthContext } from '../authContext';
+import { Link } from 'react-router-dom';
 
 const Post = ({postData, getUser}) => {
 
-    const {username, likedPosts} = useContext(AuthContext);
+    let {username, likedPosts} = useContext(AuthContext);
 
     const [comment, setComment] = useState("");
     const [commentMenuOpen, setCommentMenuOpen] = useState(false);
@@ -13,49 +14,7 @@ const Post = ({postData, getUser}) => {
     const [upvoted, setUpvoted] = useState(false);
     const [downvoted, setDownvoted]  = useState(false);
 
-    const upvote = () => {
-        axios({
-            method: "post",
-            data: {
-                id: postData._id,
-                username, 
-            },
-            url: "http://localhost:5000/api/posts/update/upvote"
-        })
-        .then(data => {
-            getUser();
-            
-        });
-    }
-
-    const downvote = () => {
-        axios({
-            method: "post",
-            data: {
-                id: postData._id,
-                username
-            },
-            url: "http://localhost:5000/api/posts/update/downvote"
-        })
-        .then(data => getUser());
-    }
-
-    const postComment = () => {
-        setComment("");
-        axios({
-            method: "post",
-            data: {
-                id: postData._id,
-                comment,
-                username
-            },
-            url: "http://localhost:5000/api/posts/update/comment"
-        })
-        .then(data => getUser());
-    }
-
-    useEffect(() => {
-        getUser();
+    const checkVotes = () => {
         if(likedPosts.some(likedPost => likedPost.upvoted === postData._id)){
             setUpvoted(true);
         }
@@ -69,12 +28,58 @@ const Post = ({postData, getUser}) => {
         else{
             setDownvoted(false);
         }
-    }, [getUser, likedPosts, postData._id]);
+    }
 
+    const upvote = async () => {
+        const res = await axios({
+            method: "post",
+            data: {
+                id: postData._id,
+                username, 
+            },
+            url: "http://localhost:5000/api/posts/update/upvote"
+        });
+
+        likedPosts = res.data;
+        checkVotes();
+    }
+
+    const downvote = async () => {
+        const res = await axios({
+            method: "post",
+            data: {
+                id: postData._id,
+                username, 
+            },
+            url: "http://localhost:5000/api/posts/update/downvote"
+        });
+        likedPosts = res.data;
+        checkVotes();
+    }
+
+    const postComment = () => {
+        setComment("");
+        axios({
+            method: "post",
+            data: {
+                id: postData._id,
+                comment,
+                username
+            },
+            url: "http://localhost:5000/api/posts/update/comment"
+        })
+        .then(data => getUser())
+        .catch(err => console.log(err));
+    }
+
+    useEffect(() => {
+        checkVotes();
+    }, [])
+    
     return(
         <div className = "Post">
             <div className = "post-header">
-                <p className = "post-username">By {postData.username}</p>
+                <Link to = {`/profile/${postData.username}`} className = "post-username">By {postData.username}</Link>
                 <p className = "post-title">{postData.title}</p>
             </div>
             <div className = "post-body">{postData.content}</div>
@@ -99,7 +104,7 @@ const Post = ({postData, getUser}) => {
                     <input value = {comment} onChange = {(e) => setComment(e.target.value)} placeholder = "Comment?" className = "post-input"></input>
                     <button onClick = {postComment} className = "post-comment-button">Post</button>
                 </div>
-                {postData.comments.map(commentObj => <Comment content = {commentObj.comment} username = {commentObj.username}/>)}
+                {postData.comments.map(commentObj => <Comment key = {postData.comments.indexOf(commentObj)} content = {commentObj.comment} username = {commentObj.username}/>)}
             </div>}
         </div>
     );

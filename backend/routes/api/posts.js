@@ -49,15 +49,14 @@ router.post('/update/upvote', (req, res) => {
                         user.likedPosts = user.likedPosts.filter(likedPost => likedPost.upvoted !== req.body.id);
                         post.votes = post.votes - 1; 
                     }
-                    user.save();
+                    user.save()
+                        .then(dat => res.send(user.likedPosts));
                     post.save();
                 })
                 .catch(err => console.log(err));
             }
         )
         .catch(err => console.log(err));
-
-    res.send("Success");
 });
 
 router.post('/update/downvote', (req, res) => {
@@ -80,15 +79,14 @@ router.post('/update/downvote', (req, res) => {
                         user.likedPosts = user.likedPosts.filter(likedPost => likedPost.downvoted !== req.body.id);
                         post.votes = post.votes + 1;
                     }
-                    user.save();
+                    user.save()
+                        .then(dat => res.send(user.likedPosts));
                     post.save();
                 })
                 .catch(err => console.log(err));
             }
         )
         .catch(err => console.log(err));
-
-    res.send("Success");
 });
 
 router.post('/update/comment', (req, res) => {
